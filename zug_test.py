@@ -5,7 +5,7 @@ import serial
 import time
 
 user= "lucakreativ"
-meintoken="QHwDl55O3vSbY9Ec"
+meintoken=""
 
 mcount=0
 halb_moves=["", ""]
