@@ -23,15 +23,17 @@ felder_name=[
 "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
 ]
 
-altser_data=["x","x", "x"]
+altser_data=["x","x","x"]
+filter_data=["x","x"]
 
 
 lesestat=0
 #time.sleep(3)
 
-def Serial(lesestat):
+def Serial():
+    #print(mcount)
     try:
-        ser = serial.Serial('/dev/ttyACM0', 9600)
+        ser = serial.Serial('/dev/ttyUSB1', 9600)
 
     except serial.serialutil.SerialException:
         print("Bitte DGT-Brett anschließen")
@@ -54,7 +56,16 @@ def Serial(lesestat):
 
                 if altser_data[2]!= "x":
                     #print("nicht x")
-                    Felder(ser_data, altser_data[1], mcount)
+                    print(ser_data)
+                    
+                    if altser_data[0]!=altser_data[1]:
+                        Serial()
+                    else:
+                        filter_data[1]=filter_data[0]
+                        filter_data[0]=altser_data[0]
+
+                        if filter_data[1]!="x":
+                            Felder(filter_data[0], filter_data[1], mcount)
                 else:
                     print("Keine Referenz")
             else:
@@ -80,49 +91,59 @@ def checkGame():
 
 def Felder(ser_data, altser_datan, mcount):
     if ser_data!=altser_datan:
-        print("neues Spielfeld")
+        #print("neues Spielfeld")
         #print(altser_data)
+        #print(halb_moves[0])
+
+        #print(mcount)
 
         #i=0
-        for i in range(63):
+        for i in range(64):
             if ser_data[i]!=altser_datan[i]:
-                if mcount==0:
+                if halb_moves[0]=="":
                     ms=felder_name[i]
-                    #print(ms)
+                    print("Erst: "+ms)
 
                     halb_moves[1]=halb_moves[0]
                     halb_moves[0]=ms
 
-                    if halb_moves[1]==halb_moves[0]:
-                        mcount=0
-                    else:
-                        mcount=1
+                    #if halb_moves[1]==halb_moves[0]:
+                        #mcount=0
+                    #else:
+                    mcount=1
 
 
-                elif mcount==1:
+                elif halb_moves!="":
                     me=felder_name[i]
-                    #print(me)
+                    print("Zweit :"+me)
 
                     halb_moves[1]=halb_moves[0]
                     halb_moves[0]=me
 
-                    if halb_moves[0]==halb_moves[1]:
-                        mcount=1
-                    else:
-                        move=halb_moves[0]+halb_moves[1]
+                    #if halb_moves[0]==halb_moves[1]:
+                        #mcount=1
+                    #else:
+                    move=halb_moves[1]+halb_moves[0]
 
-                        mcount=0
-                        Move(move)
+                    halb_moves[0]=""
+                    halb_moves[1]=""
+
+
+                    mcount=0
+                    Move(move)
 
 
         i+=1
 
 
 def Move(move):
+    print()
     print("Zug ist: "+move)
+    sendMove(move)
+    """
     rf = input("Richtig/Fasch (y/n): ")
     if rf=="y":
-        #sendMove(move)
+        sendMove(move)
         print()
     elif rf=="n":
         print()
@@ -131,8 +152,8 @@ def Move(move):
     else:
         print()
         print("Bitte Ja oder Nein eingeben (y/n)")
-        #Move(move)
-
+        Move(move)
+    """
 
 def sendMove(move):
     print()
@@ -153,21 +174,22 @@ async def main(move, id_game):
 
 
 def Lichess_response(response):
-    pos=find.response("content")
-    posE=find.response("}", pos)
+    print(response)
+    """pos=find.response("content")
+    posE=response.find("}", pos)
     zurück_lichess=response[pos+12:posE-1]
-    pos=find.zurück_lichess("ok")
+    pos=zurück_lichess.find("ok")
 
     if pos==-1:
         print(zurück_lichess)
     else:
-        print("Zuck wurde erfolgreich ausgeführt")
+        print("Zug wurde erfolgreich ausgeführt")"""
 
 
 
 
 while True:
     #lesestat=Serial(lesestat)
-    Serial(lesestat)
+    Serial()
     
     time.sleep(0.1)
