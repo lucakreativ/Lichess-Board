@@ -1,5 +1,6 @@
 import requests
 import asyncio
+import json
 from lichess_client import APIClient
 import serial
 import time
@@ -9,8 +10,13 @@ meintoken=""
 
 mcount=0
 halb_moves=["", ""]
-#id_game="VKdMtBsg"
-#moves="e2e4"
+backs_moves=["", ""]
+USB_Port="1"
+
+#0 for nicht senden und 1 für senden
+senden_ja_nein=0
+
+
 
 felder_name=[
 "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
@@ -21,7 +27,9 @@ felder_name=[
 "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
 "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
 "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
+"z"
 ]
+felder_name_back=felder_name[::-1]
 
 altser_data=["x","x","x"]
 filter_data=["x","x"]
@@ -33,7 +41,7 @@ lesestat=0
 def Serial():
     #print(mcount)
     try:
-        ser = serial.Serial('/dev/ttyUSB1', 9600)
+        ser = serial.Serial('/dev/ttyUSB'+USB_Port, 9600)
 
     except serial.serialutil.SerialException:
         print("Bitte DGT-Brett anschließen")
@@ -56,7 +64,7 @@ def Serial():
 
                 if altser_data[2]!= "x":
                     #print("nicht x")
-                    print(ser_data)
+                    #print(ser_data)
                     
                     if altser_data[0]!=altser_data[1]:
                         Serial()
@@ -97,94 +105,91 @@ def Felder(ser_data, altser_datan, mcount):
 
         #print(mcount)
 
-        #i=0
-        for i in range(64):
+        for i in range(65):
             if ser_data[i]!=altser_datan[i]:
                 if halb_moves[0]=="":
                     ms=felder_name[i]
-                    print("Erst: "+ms)
 
-                    halb_moves[1]=halb_moves[0]
-                    halb_moves[0]=ms
+                    if ms!="z":
+                        print("Erst: "+ms)
 
-                    #if halb_moves[1]==halb_moves[0]:
-                        #mcount=0
-                    #else:
-                    mcount=1
+                        #ob es ein Schlagzug ist
+                        
+                        if ms==backs_moves[1] or ms==backs_moves[0]:
+                            print("schlagzug")
+                            halb_moves[1]=halb_moves[0]
+                            halb_moves[0]=""
+                        else:
+                            halb_moves[0]=ms
 
 
                 elif halb_moves!="":
                     me=felder_name[i]
+
                     print("Zweit :"+me)
 
                     halb_moves[1]=halb_moves[0]
                     halb_moves[0]=me
 
+                    backs_moves[1]=halb_moves[1]
+                    backs_moves[0]=halb_moves[0]
+
                     #if halb_moves[0]==halb_moves[1]:
                         #mcount=1
                     #else:
                     move=halb_moves[1]+halb_moves[0]
+                    move2=halb_moves[0]+halb_moves[1]
 
+                    halb_moves[1]=halb_moves[0]
                     halb_moves[0]=""
-                    halb_moves[1]=""
 
-
-                    mcount=0
-                    Move(move)
+                    if halb_moves[1]!="z" and halb_moves[0] != "z":
+                        Move(move, move2)
+                    else:
+                        print("Halbzug Manuell eingegeben")
 
 
         i+=1
 
 
-def Move(move):
+def Move(move, move2):
     print()
-    print("Zug ist: "+move)
-    sendMove(move)
-    """
-    rf = input("Richtig/Fasch (y/n): ")
-    if rf=="y":
-        sendMove(move)
-        print()
-    elif rf=="n":
-        print()
-        print("Zürückstellen innerhalb 5 Sekunden und dann nochmal machen")
-        time.sleep(5)
-    else:
-        print()
-        print("Bitte Ja oder Nein eingeben (y/n)")
-        Move(move)
-    """
+    print("Zug ist: "+move+", oder: "+move2)
+    if senden_ja_nein==1:
+        sendMove(move, move2)
+    
 
-def sendMove(move):
+def sendMove(move, move2):
     print()
 
     game_id=checkGame()
     if game_id!="0":
         loop = asyncio.get_event_loop()
         loop.run_until_complete(main(move, game_id))
+
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(main(move2, game_id))
     else:
         print("Du bist gerade in keinem Spiel, bitte Figur zurückstellen(innerhalb 5 Sekunden) und ein Spiel starten")
+
+    
+    #sleep(1)
 
 
 async def main(move, id_game):
     client = APIClient(token=meintoken)
     response = await client.boards.make_move(game_id=id_game, move=move)
-    #print(response)
+
+    #response=str(response)
+    #response="["+response+"]"
     Lichess_response(response)
 
 
 def Lichess_response(response):
     print(response)
-    """pos=find.response("content")
-    posE=response.find("}", pos)
-    zurück_lichess=response[pos+12:posE-1]
-    pos=zurück_lichess.find("ok")
-
-    if pos==-1:
-        print(zurück_lichess)
-    else:
-        print("Zug wurde erfolgreich ausgeführt")"""
-
+    #print(type(response))
+    #json_response=json.loads(response)
+    print()
 
 
 
