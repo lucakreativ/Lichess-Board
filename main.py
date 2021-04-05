@@ -11,10 +11,10 @@ meintoken=""
 mcount=0
 halb_moves=["", ""]
 backs_moves=["", ""]
-USB_Port="1"
+USB_Port="0"
 
 #0 for nicht senden und 1 für senden
-senden_ja_nein=0
+senden_ja_nein=1
 
 
 
@@ -29,7 +29,7 @@ felder_name=[
 "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
 "z"
 ]
-felder_name_back=felder_name[::-1]
+
 
 altser_data=["x","x","x"]
 filter_data=["x","x"]
@@ -37,6 +37,17 @@ filter_data=["x","x"]
 
 lesestat=0
 #time.sleep(3)
+def farbe():
+    farbe=input("s=schwarz, w=weiß: ")
+    if farbe!="w" and farbe!="s":
+        farbe()
+
+farbe()
+
+if farbe=="s":
+    felder_name=felder_name[::-1]
+
+
 
 def Serial():
     #print(mcount)
@@ -57,6 +68,10 @@ def Serial():
             #print(ser_data)
             if len(ser_data)>=66:
                 #print("Groß Genug")
+
+                #Umdrehen wegen Farbe
+                if farbe=="s":
+                    ser_data=ser_data[::-1]
 
                 altser_data[2]=altser_data[1]
                 altser_data[1]=altser_data[0]
