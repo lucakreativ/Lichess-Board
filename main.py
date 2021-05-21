@@ -1,7 +1,6 @@
 import requests
 import asyncio
 import json
-from lichess_client import APIClient
 import serial
 import time
 
@@ -45,7 +44,7 @@ def Serial():
 
     except serial.serialutil.SerialException:
         print("Bitte DGT-Brett anschließen")
-        print("1")
+        #print("1")
         #lesSerial()
 
     else:
@@ -165,27 +164,11 @@ def sendMove(move, move2):
     print()
 
     game_id=checkGame()
-    if game_id!="0":
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(main(move, game_id))
+    resoponse=requests.post("https://lichess.org/api/board/game/"+game_id+"/move/"+move, headers={"Authorization":"Bearer "+meintoken})
+    print(resoponse)
 
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(main(move2, game_id))
-    else:
-        print("Du bist gerade in keinem Spiel, bitte Figur zurückstellen(innerhalb 5 Sekunden) und ein Spiel starten")
-
-    
-    #sleep(1)
-
-
-async def main(move, id_game):
-    client = APIClient(token=meintoken)
-    response = await client.boards.make_move(game_id=id_game, move=move)
-
-    #response=str(response)
-    #response="["+response+"]"
-    Lichess_response(response)
-
+    resoponse=requests.post("https://lichess.org/api/board/game/"+game_id+"/move/"+move2, headers={"Authorization":"Bearer "+meintoken})
+    print(resoponse)
 
 def Lichess_response(response):
     print(response)
