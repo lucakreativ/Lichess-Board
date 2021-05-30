@@ -1,11 +1,11 @@
-import requests
-import asyncio
-import json
-import serial
 import time
+import json
 
-user= ""
-meintoken=""
+import serial
+import requests
+
+user= "lucakreativ"
+meintoken="Stb8vE3X87q0qznM"
 
 mcount=0
 halb_moves=["", ""]
@@ -53,10 +53,17 @@ def Serial():
             ser_data = ser.readline()
         except serial.serialutil.SerialException:
             print("Bitte DGT-Brett anschließen")
-            print("2")
+            #print("2")
         else:
+            ser_data=str(ser_data)
+            startd=ser_data.find("s//")+3
+            endd=ser_data.find("//s")
+            ser_data=ser_data[startd:endd]
             #print(ser_data)
-            if len(ser_data)>=66:
+
+
+            if len(ser_data)>=65:
+                
                 #print("Groß Genug")
 
                 altser_data[2]=altser_data[1]
@@ -67,14 +74,11 @@ def Serial():
                     #print("nicht x")
                     #print(ser_data)
                     
-                    if altser_data[0]!=altser_data[1]:
-                        Serial()
-                    else:
-                        filter_data[1]=filter_data[0]
-                        filter_data[0]=altser_data[0]
+                    filter_data[1]=filter_data[0]
+                    filter_data[0]=altser_data[0]
 
-                        if filter_data[1]!="x":
-                            Felder(filter_data[0], filter_data[1], mcount)
+                    if filter_data[1]!="x":
+                        maxChanges(filter_data[0], filter_data[1], mcount)
                 else:
                     print("Keine Referenz")
             else:
@@ -98,56 +102,59 @@ def checkGame():
         return("0")
 
 
-def Felder(ser_data, altser_datan, mcount):
+def maxChanges(ser_data, altser_datan, mcount):
+    changesz=0
+    #print(ser_data)
     if ser_data!=altser_datan:
-        #print("neues Spielfeld")
-        #print(altser_data)
-        #print(halb_moves[0])
+        for i in range(65):
+            if ser_data[i]!=altser_datan[i]:
+                changesz+=1
+    #print("Änderungen: "+str(changesz))
+    Felder(ser_data, altser_datan, mcount, changesz)
 
-        #print(mcount)
+
+def Felder(ser_data, altser_datan, mcount, changesz):
+    if changesz<=2:
 
         for i in range(65):
             if ser_data[i]!=altser_datan[i]:
-                if halb_moves[0]=="":
-                    ms=felder_name[i]
+                if ser_data[i]=="0":
+                    if halb_moves[0]=="":
+                        ms=felder_name[i]
 
-                    if ms!="z":
-                        print("Erst: "+ms)
+                        if ms!="z":
+                            print("Erst: "+ms)
 
-                        #ob es ein Schlagzug ist
-                        
-                        if ms==backs_moves[1] or ms==backs_moves[0]:
-                            print("schlagzug")
-                            halb_moves[1]=halb_moves[0]
-                            halb_moves[0]=""
+                            #ob es ein Schlagzug ist
+                                                      
+                        halb_moves[0]=ms
+
+
+                elif ser_data[i]=="1":
+                    if halb_moves[0]!="":
+                        me=felder_name[i]
+
+                        print("Zweit :"+me)
+
+                        halb_moves[1]=halb_moves[0]
+                        halb_moves[0]=me
+
+                        backs_moves[1]=halb_moves[1]
+                        backs_moves[0]=halb_moves[0]
+
+                        #if halb_moves[0]==halb_moves[1]:
+                            #mcount=1
+                        #else:
+                        move=halb_moves[1]+halb_moves[0]
+                        move2=halb_moves[0]+halb_moves[1]
+
+                        halb_moves[1]=halb_moves[0]
+                        halb_moves[0]=""
+
+                        if halb_moves[1]!="z" and halb_moves[0] != "z":
+                            Move(move, move2)
                         else:
-                            halb_moves[0]=ms
-
-
-                elif halb_moves!="":
-                    me=felder_name[i]
-
-                    print("Zweit :"+me)
-
-                    halb_moves[1]=halb_moves[0]
-                    halb_moves[0]=me
-
-                    backs_moves[1]=halb_moves[1]
-                    backs_moves[0]=halb_moves[0]
-
-                    #if halb_moves[0]==halb_moves[1]:
-                        #mcount=1
-                    #else:
-                    move=halb_moves[1]+halb_moves[0]
-                    move2=halb_moves[0]+halb_moves[1]
-
-                    halb_moves[1]=halb_moves[0]
-                    halb_moves[0]=""
-
-                    if halb_moves[1]!="z" and halb_moves[0] != "z":
-                        Move(move, move2)
-                    else:
-                        print("Halbzug Manuell eingegeben")
+                            print("Halbzug Manuell eingegeben")
 
 
         i+=1
@@ -165,10 +172,10 @@ def sendMove(move, move2):
 
     game_id=checkGame()
     resoponse=requests.post("https://lichess.org/api/board/game/"+game_id+"/move/"+move, headers={"Authorization":"Bearer "+meintoken})
-    print(resoponse)
+    print(resoponse.text)
 
     resoponse=requests.post("https://lichess.org/api/board/game/"+game_id+"/move/"+move2, headers={"Authorization":"Bearer "+meintoken})
-    print(resoponse)
+    print(resoponse.text)
 
 def Lichess_response(response):
     print(response)
