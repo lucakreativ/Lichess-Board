@@ -4,8 +4,8 @@ import json
 import serial
 import requests
 
-user= "lucakreativ"
-meintoken="Stb8vE3X87q0qznM"
+user= ""
+meintoken=""
 
 mcount=0
 halb_moves=["", ""]
