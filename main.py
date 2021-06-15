@@ -1,9 +1,12 @@
 import time
 import json
+import os.path
 
 import serial
 import requests
 
+
+file_token="token.txt"
 user= ""
 meintoken=""
 
@@ -36,6 +39,24 @@ filter_data=["x","x"]
 
 lesestat=0
 #time.sleep(3)
+
+
+
+if not my_file.is_file(file_token):
+    f=open(file_token, "x")
+    meintoken=input("Dein Token: ")
+    f=open(file_token, "w")
+    f.write(meintoken)
+    f.close
+else:
+    f=open(file_token, "r")
+    meintoken=f.read()
+
+
+    
+
+
+
 
 def Serial():
     #print(mcount)
