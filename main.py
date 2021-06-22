@@ -1,14 +1,13 @@
 import time
 import json
-import os.path
+from requests.models import Response
 
 import serial
 import requests
+import logging
 
-
-file_token="token.txt"
-user= ""
-meintoken=""
+user= "lucakreativ"
+meintoken="JiKjhFwW1icpCf2G"
 
 mcount=0
 halb_moves=["", ""]
@@ -40,24 +39,6 @@ filter_data=["x","x"]
 lesestat=0
 #time.sleep(3)
 
-
-
-if not my_file.is_file(file_token):
-    f=open(file_token, "x")
-    meintoken=input("Dein Token: ")
-    f=open(file_token, "w")
-    f.write(meintoken)
-    f.close
-else:
-    f=open(file_token, "r")
-    meintoken=f.read()
-
-
-    
-
-
-
-
 def Serial():
     #print(mcount)
     try:
@@ -65,36 +46,27 @@ def Serial():
 
     except serial.serialutil.SerialException:
         print("Bitte DGT-Brett anschließen")
-        #print("1")
-        #lesSerial()
+
 
     else:
-        #print("angeschlossen")
         try:
             ser_data = ser.readline()
         except serial.serialutil.SerialException:
             print("Bitte DGT-Brett anschließen")
-            #print("2")
         else:
             ser_data=str(ser_data)
             startd=ser_data.find("s//")+3
             endd=ser_data.find("//s")
             ser_data=ser_data[startd:endd]
-            #print(ser_data)
 
 
             if len(ser_data)>=65:
-                
-                #print("Groß Genug")
-
                 altser_data[2]=altser_data[1]
                 altser_data[1]=altser_data[0]
                 altser_data[0]=ser_data
 
                 if altser_data[2]!= "x":
-                    #print("nicht x")
-                    #print(ser_data)
-                    
+
                     filter_data[1]=filter_data[0]
                     filter_data[0]=altser_data[0]
 
@@ -113,24 +85,19 @@ def checkGame():
     posP = userdata.find("playing")
 
     if posP<=1250:
-        #print("Spielt gerade")
 
         id_game=userdata[posP+30:posP+38]
-        #print(id_game)
         return(id_game)
     else:
-        #print("Spielt gerade nicht")
         return("0")
 
 
 def maxChanges(ser_data, altser_datan, mcount):
     changesz=0
-    #print(ser_data)
     if ser_data!=altser_datan:
         for i in range(65):
             if ser_data[i]!=altser_datan[i]:
                 changesz+=1
-    #print("Änderungen: "+str(changesz))
     Felder(ser_data, altser_datan, mcount, changesz)
 
 
@@ -145,8 +112,6 @@ def Felder(ser_data, altser_datan, mcount, changesz):
 
                         if ms!="z":
                             print("Erst: "+ms)
-
-                            #ob es ein Schlagzug ist
                                                       
                         halb_moves[0]=ms
 
@@ -163,9 +128,6 @@ def Felder(ser_data, altser_datan, mcount, changesz):
                         backs_moves[1]=halb_moves[1]
                         backs_moves[0]=halb_moves[0]
 
-                        #if halb_moves[0]==halb_moves[1]:
-                            #mcount=1
-                        #else:
                         move=halb_moves[1]+halb_moves[0]
                         move2=halb_moves[0]+halb_moves[1]
 
@@ -193,21 +155,11 @@ def sendMove(move, move2):
 
     game_id=checkGame()
     resoponse=requests.post("https://lichess.org/api/board/game/"+game_id+"/move/"+move, headers={"Authorization":"Bearer "+meintoken})
-    print(resoponse.text)
-
-    resoponse=requests.post("https://lichess.org/api/board/game/"+game_id+"/move/"+move2, headers={"Authorization":"Bearer "+meintoken})
-    print(resoponse.text)
-
-def Lichess_response(response):
-    print(response)
-    #print(type(response))
-    #json_response=json.loads(response)
-    print()
-
+    resoponse=resoponse.text
+    data1=resoponse.json()
+    print(data1)
 
 
 while True:
-    #lesestat=Serial(lesestat)
+
     Serial()
-    
-    time.sleep(0.1)
