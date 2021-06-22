@@ -6,8 +6,8 @@ import serial
 import requests
 import logging
 
-user= "lucakreativ"
-meintoken="JiKjhFwW1icpCf2G"
+user= ""
+meintoken=""
 
 mcount=0
 halb_moves=["", ""]
