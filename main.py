@@ -12,7 +12,7 @@ meintoken=""
 mcount=0
 halb_moves=["", ""]
 backs_moves=["", ""]
-USB_Port="1"
+USB_Port="0"
 
 #0 for nicht senden und 1 für senden
 senden_ja_nein=1
@@ -30,7 +30,6 @@ felder_name=[
 "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
 "z"
 ]
-felder_name_back=felder_name[::-1]
 
 altser_data=["x","x","x"]
 filter_data=["x","x"]
@@ -79,17 +78,16 @@ def Serial():
 
 
 def checkGame():
+
+    user="lucakreativ"
+
     userdatajason= requests.get("https://lichess.org/api/user/"+user)
     userdata=userdatajason.text
+    data_dict = json.loads(userdata)
 
-    posP = userdata.find("playing")
+    url=data_dict["playing"][20:28]
 
-    if posP<=1250:
-
-        id_game=userdata[posP+30:posP+38]
-        return(id_game)
-    else:
-        return("0")
+    return url
 
 
 def maxChanges(ser_data, altser_datan, mcount):
@@ -129,13 +127,12 @@ def Felder(ser_data, altser_datan, mcount, changesz):
                         backs_moves[0]=halb_moves[0]
 
                         move=halb_moves[1]+halb_moves[0]
-                        move2=halb_moves[0]+halb_moves[1]
 
                         halb_moves[1]=halb_moves[0]
                         halb_moves[0]=""
 
                         if halb_moves[1]!="z" and halb_moves[0] != "z":
-                            Move(move, move2)
+                            Move(move)
                         else:
                             print("Halbzug Manuell eingegeben")
 
@@ -143,11 +140,11 @@ def Felder(ser_data, altser_datan, mcount, changesz):
         i+=1
 
 
-def Move(move, move2):
+def Move(move):
     print()
-    print("Zug ist: "+move+", oder: "+move2)
+    print("Zug ist: "+move)
     if senden_ja_nein==1:
-        sendMove(move, move2)
+        sendMove(move)
     
 
 def sendMove(move, move2):
@@ -155,9 +152,9 @@ def sendMove(move, move2):
 
     game_id=checkGame()
     resoponse=requests.post("https://lichess.org/api/board/game/"+game_id+"/move/"+move, headers={"Authorization":"Bearer "+meintoken})
-    resoponse=resoponse.text
-    data1=resoponse.json()
-    print(data1)
+    #resoponse=resoponse.text
+    #data1=resoponse.json()
+    print(resoponse.text)
 
 
 while True:

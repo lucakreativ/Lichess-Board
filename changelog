@@ -1,0 +1,36 @@
+1.0.0.0
+Grundversion ist fertig
+
+1.0.1.0
+async-lichess-sdk Libary entfernt, durch reqeust.post ersetzt
+
+1.0.2.0
+absofort wird überprüft, ob sie(die Figur) aufgehoben/abgesetzt wurde
+
+1.0.2.1
+Fehlerbehebung
+
+1.0.3.0
+keine zwei Seriellle Daten erforderlich, wurde durch Arduino gelöst
+max. Anzahl an Änderungen pro Datensatz
+
+1.0.4.0
+2 Daten weider erforderlich
+
+1.0.4.1
+Fehlerbehebung
+cut out Seriell nutzlose Daten
+
+1.0.4.2
+Fehlerbehebung
+
+1.0.5.0
+Code kompremierung
+Unnötiges Zeug entfernt
+
+1.0.6.0
+requirments mit pip installieren
+
+1.0.6.1
+Unbekannte Playing Id, konnte nicht ausgelsen wurde
+Code kompremierung, unnötige Befehle entfernt
