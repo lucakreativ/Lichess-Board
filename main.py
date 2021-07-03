@@ -147,7 +147,7 @@ def Move(move):
         sendMove(move)
     
 
-def sendMove(move, move2):
+def sendMove(move):
     print()
 
     game_id=checkGame()
