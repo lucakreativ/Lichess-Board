@@ -34,3 +34,10 @@ requirments mit pip installieren
 1.0.6.1
 Unbekannte Playing Id, konnte nicht ausgelsen wurde
 Code kompremierung, unnötige Befehle entfernt
+
+1.0.6.2
+Raiset Exception wenn kein Spiel vorhanden ist --> Fixed
+requirments.txt angepasst --> added one Libary
+
+1.0.7.0
+Animation, bei Board nicht connected

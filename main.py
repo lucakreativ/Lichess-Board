@@ -1,10 +1,11 @@
 import time
 import json
 from requests.models import Response
+import os
 
 import serial
 import requests
-import logging
+
 
 user= ""
 meintoken=""
@@ -16,7 +17,10 @@ USB_Port="0"
 
 #0 for nicht senden und 1 für senden
 senden_ja_nein=1
+animation=["|","/","-","\\", "|", "-", "\\"]
 
+
+anima_count=[0]
 
 
 felder_name=[
@@ -38,14 +42,20 @@ filter_data=["x","x"]
 lesestat=0
 #time.sleep(3)
 
-def Serial():
+def Serial(anima_count):
     #print(mcount)
     try:
         ser = serial.Serial('/dev/ttyUSB'+USB_Port, 9600)
 
     except serial.serialutil.SerialException:
-        print("Bitte DGT-Brett anschließen")
+        os.system('clear')
+        print("Bitte DGT-Brett anschließen ("+animation[anima_count[0]]+")")
+        anima_count[0]+=1
+        if anima_count[0]>=7:
+            anima_count[0]=0
+        time.sleep(0.5)
 
+        
 
     else:
         try:
@@ -79,15 +89,17 @@ def Serial():
 
 def checkGame():
 
-    user="lucakreativ"
-
     userdatajason= requests.get("https://lichess.org/api/user/"+user)
     userdata=userdatajason.text
-    data_dict = json.loads(userdata)
+    json_user = json.loads(userdata)
 
-    url=data_dict["playing"][20:28]
-
-    return url
+    try:
+        url=json_user["playing"][20:28]
+    except KeyError:
+        print("You arent Playing a Game right now")
+        return "0"
+    else:
+        return url
 
 
 def maxChanges(ser_data, altser_datan, mcount):
@@ -151,12 +163,10 @@ def sendMove(move):
     print()
 
     game_id=checkGame()
-    resoponse=requests.post("https://lichess.org/api/board/game/"+game_id+"/move/"+move, headers={"Authorization":"Bearer "+meintoken})
-    #resoponse=resoponse.text
-    #data1=resoponse.json()
-    print(resoponse.text)
+    if game_id!="0":
+        resoponse=requests.post("https://lichess.org/api/board/game/"+game_id+"/move/"+move, headers={"Authorization":"Bearer "+meintoken})
+        print(resoponse.text)
 
 
 while True:
-
-    Serial()
+    Serial(anima_count=anima_count)
